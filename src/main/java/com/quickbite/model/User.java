@@ -6,7 +6,7 @@ public class User extends BaseEntity {
     private String name;
     private String email;
     private String passwordHash;
-    private String role; // "ROLE_STUDENT" or "ROLE_STAFF"
+    private String role; 
 
     public User() {
         super();

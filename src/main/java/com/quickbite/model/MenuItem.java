@@ -7,7 +7,7 @@ public class MenuItem extends BaseEntity {
     private String name;
     private String description;
     private BigDecimal price;
-    private String category; // "SNACKS", "MEALS", "BEVERAGES"
+    private String category; 
     private boolean available;
     private int prepTimeMinutes;
 

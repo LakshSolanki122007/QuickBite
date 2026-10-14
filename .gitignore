@@ -1,0 +1,11 @@
+# Secret environment variables (NEVER push to GitHub)
+.env
+
+# Maven compiled output
+target/
+
+# IDE & macOS files
+.DS_Store
+.vscode/
+.idea/
+*.iml

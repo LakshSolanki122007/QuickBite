@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public class Order extends BaseEntity {
     private Long userId;
     private Long pickupSlotId;
-    private String status; // "PENDING", "PREPARING", "READY", "COMPLETED", "CANCELLED"
+    private String status; 
     private BigDecimal totalPrice;
 
     public Order() {

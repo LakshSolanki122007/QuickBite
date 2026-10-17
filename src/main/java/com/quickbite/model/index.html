@@ -55,10 +55,11 @@
 
             
             <div class="flex items-center space-x-4">
-                <div class="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Canteen Open</span>
-                </div>
+                <!-- Interactive Canteen Status Toggle Switch -->
+                <button onclick="toggleCanteenStatus()" id="canteen-status-btn" class="hidden lg:flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium cursor-pointer hover:bg-emerald-500/20 transition-all shadow-md">
+                    <span id="canteen-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="canteen-text">Canteen Open</span>
+                </button>
 
                 
                 <button onclick="toggleCart()" class="relative p-3 rounded-2xl bg-slate-900 border border-slate-800 hover:border-brand-500/50 hover:bg-slate-800/80 transition-all text-slate-200 shadow-md">
@@ -73,19 +74,18 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
         
-        <section id="tab-menu" class="space-y-6">
+        <section id="tab-menu" class="space-y-6 transition-all duration-300 transform opacity-100 scale-100">
             
-            <div class="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 sm:p-12 shadow-2xl">
-                <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="relative z-10 max-w-2xl space-y-4">
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold uppercase tracking-wider">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-900 border border-slate-800 p-8 sm:p-12 shadow-2xl">
+                <div class="relative z-15 max-w-2xl space-y-4">
+                    <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-semibold uppercase tracking-wider shadow-inner">
                         <i data-lucide="zap" class="w-3.5 h-3.5"></i>
                         <span>Lightning Fast Canteen Service</span>
                     </div>
                     <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
                         Skip the Queue, <br><span class="text-brand-400">Grab Your Fast Food</span>
                     </h1>
-                    <p class="text-slate-300 text-sm sm:text-base font-medium">
+                    <p class="text-slate-300 text-sm sm:text-base font-medium leading-relaxed">
                         Order gourmet burgers, cheesy pizzas, crispy fries, and refreshing beverages instantly. Pre-book your pickup slot and collect without waiting!
                     </p>
                 </div>
@@ -129,7 +129,7 @@
         </section>
 
         <!-- TAB 2: ACTIVE ORDERS & TRACKING -->
-        <section id="tab-orders" class="hidden space-y-6">
+        <section id="tab-orders" class="hidden space-y-6 transition-all duration-300 transform opacity-0 scale-95">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-black tracking-tight text-white">Your Orders & Tokens</h2>
@@ -200,7 +200,7 @@
                     </div>
 
                     <!-- Checkout Button -->
-                    <button onclick="proceedCheckout()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-amber-600 hover:from-brand-500 hover:to-amber-500 text-white font-bold text-base shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center space-x-2">
+                    <button id="checkout-btn" onclick="proceedCheckout()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-amber-600 hover:from-brand-500 hover:to-amber-500 text-white font-bold text-base shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center space-x-2">
                         <span>Place Order & Get Token</span>
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </button>
@@ -212,7 +212,7 @@
     <!-- Footer -->
     <footer class="border-t border-slate-900 bg-slate-950 py-8 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-600">
-            &copy; 2026 QuickBite Canteen Management System. Built with Java, Javalin & MySQL.
+            &copy; 2026 QuickBite Canteen Management System. Developed with precision by Laksh Solanki.
         </div>
     </footer>
 
@@ -318,6 +318,7 @@
         let activeCategory = 'ALL';
         let searchQuery = '';
         let tokenCounter = 1;
+        let isCanteenOpen = true;
 
         // Initialize Lucide Icons
         document.addEventListener("DOMContentLoaded", () => {
@@ -326,7 +327,34 @@
             updateCartBadge();
         });
 
-        // Switch Tabs
+        // Toggle Canteen Open / Closed Status
+        function toggleCanteenStatus() {
+            isCanteenOpen = !isCanteenOpen;
+            const btn = document.getElementById('canteen-status-btn');
+            const dot = document.getElementById('canteen-dot');
+            const text = document.getElementById('canteen-text');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            if (isCanteenOpen) {
+                btn.className = "hidden lg:flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium cursor-pointer hover:bg-emerald-500/20 transition-all shadow-md";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                text.innerText = "Canteen Open";
+                checkoutBtn.disabled = false;
+                checkoutBtn.className = "w-full py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-amber-600 hover:from-brand-500 hover:to-amber-500 text-white font-bold text-base shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer";
+                checkoutBtn.innerHTML = `<span>Place Order & Get Token</span><i data-lucide="arrow-right" class="w-5 h-5"></i>`;
+            } else {
+                btn.className = "hidden lg:flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium cursor-pointer hover:bg-rose-500/20 transition-all shadow-md";
+                dot.className = "w-2 h-2 rounded-full bg-rose-500";
+                text.innerText = "Canteen Closed";
+                checkoutBtn.disabled = true;
+                checkoutBtn.className = "w-full py-4 rounded-2xl bg-slate-800 text-slate-500 font-bold text-base cursor-not-allowed flex items-center justify-center space-x-2";
+                checkoutBtn.innerHTML = `<span>Canteen is Currently Closed</span>`;
+            }
+            lucide.createIcons();
+            renderMenu();
+        }
+
+        // Switch Tabs with Smooth Fade/Scale Transition
         function switchTab(tabName) {
             const menuTab = document.getElementById('tab-menu');
             const ordersTab = document.getElementById('tab-orders');
@@ -334,13 +362,29 @@
             const navOrders = document.getElementById('nav-orders');
 
             if (tabName === 'menu') {
-                menuTab.classList.remove('hidden');
-                ordersTab.classList.add('hidden');
+                ordersTab.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    ordersTab.classList.add('hidden');
+                    menuTab.classList.remove('hidden');
+                    setTimeout(() => {
+                        menuTab.classList.remove('opacity-0', 'scale-95');
+                        menuTab.classList.add('opacity-100', 'scale-100');
+                    }, 20);
+                }, 150);
+
                 navMenu.className = "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 bg-brand-600 text-white shadow-md";
                 navOrders.className = "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800";
             } else {
-                menuTab.classList.add('hidden');
-                ordersTab.classList.remove('hidden');
+                menuTab.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    menuTab.classList.add('hidden');
+                    ordersTab.classList.remove('hidden');
+                    setTimeout(() => {
+                        ordersTab.classList.remove('opacity-0', 'scale-95');
+                        ordersTab.classList.add('opacity-100', 'scale-100');
+                    }, 20);
+                }, 150);
+
                 navOrders.className = "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 bg-brand-600 text-white shadow-md";
                 navMenu.className = "px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800";
                 renderOrders();
@@ -371,7 +415,6 @@
         function renderMenu() {
             const grid = document.getElementById('menu-grid');
             
-            // Filter by category and search query
             let filtered = menuItems.filter(item => {
                 const matchesCategory = activeCategory === 'ALL' || item.category === activeCategory;
                 const matchesSearch = item.name.toLowerCase().includes(searchQuery) || item.description.toLowerCase().includes(searchQuery);
@@ -414,9 +457,9 @@
                                     <span class="text-xs text-slate-500 block">Price</span>
                                     <span class="text-xl font-black text-white">₹${item.price.toFixed(2)}</span>
                                 </div>
-                                <button onclick="addToCart(${item.id})" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition-all flex items-center space-x-2">
+                                <button onclick="addToCart(${item.id})" ${!isCanteenOpen ? 'disabled' : ''} class="px-5 py-2.5 rounded-xl ${isCanteenOpen ? 'bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/30 cursor-pointer' : 'bg-slate-800 text-slate-500 cursor-not-allowed'} font-bold text-sm transition-all flex items-center space-x-2">
                                     <i data-lucide="plus" class="w-4 h-4"></i>
-                                    <span>Add</span>
+                                    <span>${isCanteenOpen ? 'Add' : 'Closed'}</span>
                                 </button>
                             </div>
                         </div>
@@ -435,6 +478,7 @@
 
         // Add to Cart
         function addToCart(itemId) {
+            if (!isCanteenOpen) return;
             const product = menuItems.find(i => i.id === itemId);
             const existing = cart.find(i => i.id === itemId);
             if (existing) {
@@ -525,9 +569,13 @@
             lucide.createIcons();
         }
 
-        // Proceed Checkout with Token Generation
+        // Proceed Checkout with Token Generation & Push Notifications
         function proceedCheckout() {
-            if (cart.length === 0) return;
+            if (!isCanteenOpen || cart.length === 0) return;
+
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
 
             const slot = document.getElementById('pickup-slot-select').value;
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
@@ -544,6 +592,7 @@
                 slot: slot,
                 total: total,
                 status: 'PREPARING',
+                showConfirm: false, // controls inline confirmation prompt
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
 
@@ -552,6 +601,43 @@
             updateCartBadge();
             toggleCart();
             switchTab('orders');
+
+            // Automatically update status and fire browser notification after 6 seconds
+            setTimeout(() => {
+                newOrder.status = 'READY TO PICK UP';
+                renderOrders();
+
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("QuickBite Canteen 🍔", {
+                        body: `Token ${newOrder.token} is ready for pickup! Head over to the counter.`,
+                        icon: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=100&q=80"
+                    });
+                }
+            }, 6000);
+        }
+
+        // Trigger Inline Confirmation Box
+        function promptConfirmPickup(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.showConfirm = true;
+                renderOrders();
+            }
+        }
+
+        // Cancel Inline Confirmation Box
+        function cancelConfirmPickup(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.showConfirm = false;
+                renderOrders();
+            }
+        }
+
+        // Complete Pickup & Remove Order
+        function executeConfirmPickup(orderId) {
+            orders = orders.filter(o => o.id !== orderId);
+            renderOrders();
         }
 
         // Render Active Orders
@@ -574,43 +660,68 @@
                 return;
             }
 
-            container.innerHTML = orders.map(order => `
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
-                        <div class="flex items-center space-x-4">
-                            <div class="px-4 py-2.5 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-400 shadow-lg">
-                                <span class="block text-[10px] font-bold uppercase tracking-widest text-brand-500">Canteen Token</span>
-                                <span class="text-2xl font-black tracking-tight text-white">${order.token}</span>
+            container.innerHTML = orders.map(order => {
+                const isReady = order.status === 'READY TO PICK UP';
+                const badgeClass = isReady 
+                    ? "px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5 shadow-lg shadow-emerald-500/20"
+                    : "px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5";
+                
+                const dotClass = isReady ? "w-2 h-2 rounded-full bg-emerald-400 animate-bounce" : "w-2 h-2 rounded-full bg-amber-500 animate-ping";
+
+                return `
+                    <div class="bg-slate-900 border ${isReady ? 'border-emerald-500/50 shadow-emerald-500/10' : 'border-slate-800'} rounded-3xl p-6 shadow-xl space-y-4 transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="px-4 py-2.5 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-400 shadow-lg">
+                                    <span class="block text-[10px] font-bold uppercase tracking-widest text-brand-500">Canteen Token</span>
+                                    <span class="text-2xl font-black tracking-tight text-white">${order.token}</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-semibold text-slate-400">Order ID: ${order.id}</span>
+                                    <h4 class="text-base font-bold text-white mt-0.5">Slot: ${order.slot}</h4>
+                                </div>
                             </div>
-                            <div>
-                                <span class="text-xs font-semibold text-slate-400">Order ID: ${order.id}</span>
-                                <h4 class="text-base font-bold text-white mt-0.5">Slot: ${order.slot}</h4>
+                            <div class="flex items-center space-x-3">
+                                <span class="${badgeClass}">
+                                    <span class="${dotClass}"></span>
+                                    <span>${order.status}</span>
+                                </span>
+                                ${isReady && !order.showConfirm ? `<button onclick="promptConfirmPickup('${order.id}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/30 cursor-pointer">Confirm Pickup</button>` : ''}
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                                <span>${order.status}</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        ${order.items.map(i => `
-                            <div class="flex justify-between text-sm">
-                                <span class="text-slate-300 font-medium">${i.quantity}x${i.name}</span>
-                                <span class="text-slate-400">₹${(i.price * i.quantity).toFixed(2)}</span>
+
+                        <!-- Inline Confirmation Prompt Banner -->
+                        ${order.showConfirm ? `
+                            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
+                                <div class="flex items-center space-x-2 text-emerald-300 text-sm font-medium">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+                                    <span>Have you collected your order from the counter?</span>
+                                </div>
+                                <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                                    <button onclick="cancelConfirmPickup('${order.id}')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all cursor-pointer">Cancel</button>
+                                    <button onclick="executeConfirmPickup('${order.id}')" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer">Yes, Collected</button>
+                                </div>
                             </div>
-                        `).join('')}
-                    </div>
-                    <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-sm">
-                        <span class="text-slate-400">Ordered at ${order.time}</span>
-                        <div class="text-right">
-                            <span class="text-xs text-slate-500 mr-2">Total Paid:</span>
-                            <span class="text-base font-black text-white">₹${order.total.toFixed(2)}</span>
+                        ` : ''}
+
+                        <div class="space-y-2">
+                            ${order.items.map(i => `
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-300 font-medium">${i.quantity}x${i.name}</span>
+                                    <span class="text-slate-400">₹${(i.price * i.quantity).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-sm">
+                            <span class="text-slate-400">Ordered at ${order.time}</span>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-500 mr-2">Total Paid:</span>
+                                <span class="text-base font-black text-white">₹${order.total.toFixed(2)}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             lucide.createIcons();
         }
     </script>

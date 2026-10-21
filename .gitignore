@@ -9,3 +9,5 @@ target/
 .vscode/
 .idea/
 *.iml
+target/
+*.log

@@ -1,67 +1,88 @@
 package com.quickbite.dao;
 
-import com.quickbite.util.DatabaseUtil;
-import java.sql.*;
+import com.quickbite.model.Order;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class OrderDao {
+    private static final List<Order> orders = Collections.synchronizedList(new ArrayList<>());
+    private static final AtomicLong idCounter = new AtomicLong(101);
 
-    // Method to create an order and generate a global sequential token
-    public synchronized String createOrder(String slot, double totalAmount) {
-        String insertQuery = "INSERT INTO orders (pickup_slot, total_amount, status, created_at) VALUES (?, ?, 'PREPARING', ?)";
-        String tokenString = "#01";
+    /**
+     * Creates an Order compatible with your Order.java schema.
+     * Uses your existing 6-argument constructor:
+     * Order(Long id, Long userId, Long pickupSlotId, String status, BigDecimal totalPrice, LocalDateTime createdAt)
+     */
+    public String createOrder(String slot, double totalAmount) {
+        long orderId = idCounter.getAndIncrement();
+        String token = "TK-" + orderId;
 
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
+        Order order = new Order(
+            orderId,
+            1L,                                  // Default userId
+            1L,                                  // Default pickupSlotId
+            "PENDING",                           // Initial status
+            BigDecimal.valueOf(totalAmount),     // totalPrice
+            LocalDateTime.now()                  // createdAt
+        );
 
-            pstmt.setString(1, slot);
-            pstmt.setDouble(2, totalAmount);
-            pstmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-
-            int affectedRows = pstmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        long orderId = generatedKeys.getLong(1);
-                        tokenString = String.format("#%02d", orderId);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error creating order in database: " + e.getMessage());
-        }
-
-        return tokenString;
+        orders.add(order);
+        return token;
     }
 
-    // Method to fetch all orders for cross-device synchronization
-    public List<Map<String, Object>> getAllOrders() {
-        List<Map<String, Object>> orderList = new ArrayList<>();
-        String query = "SELECT * FROM orders ORDER BY id DESC";
+    /**
+     * Returns a thread-safe list of active orders for the admin board.
+     */
+    public List<Order> getAllOrders() {
+        synchronized (orders) {
+            return new ArrayList<>(orders);
+        }
+    }
 
-        try (Connection conn = DatabaseUtil.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            while (rs.next()) {
-                Map<String, Object> order = new HashMap<>();
-                order.put("id", "QB-" + rs.getLong("id"));
-                order.put("token", String.format("#%02d", rs.getLong("id")));
-                order.put("slot", rs.getString("pickup_slot"));
-                order.put("total", rs.getDouble("total_amount"));
-                order.put("status", rs.getString("status"));
-                order.put("time", rs.getTimestamp("created_at").toLocalDateTime().toLocalTime().toString());
-                orderList.add(order);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error fetching orders from database: " + e.getMessage());
+    /**
+     * Finds the order by matching the token or numeric ID, then updates the status.
+     */
+    public boolean updateStatus(String token, String newStatus) {
+        if (token == null || newStatus == null) {
+            return false;
         }
 
-        return orderList;
+        synchronized (orders) {
+            for (Order order : orders) {
+                String tokenWithPrefix = "TK-" + order.getId();
+                String rawId = String.valueOf(order.getId());
+
+                if (token.equalsIgnoreCase(tokenWithPrefix) || token.equalsIgnoreCase(rawId)) {
+                    order.setStatus(newStatus.toUpperCase());
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds a single order by token or numeric ID.
+     */
+    public Order getOrderByToken(String token) {
+        if (token == null) {
+            return null;
+        }
+
+        synchronized (orders) {
+            for (Order order : orders) {
+                String tokenWithPrefix = "TK-" + order.getId();
+                String rawId = String.valueOf(order.getId());
+
+                if (token.equalsIgnoreCase(tokenWithPrefix) || token.equalsIgnoreCase(rawId)) {
+                    return order;
+                }
+            }
+        }
+        return null;
     }
 }

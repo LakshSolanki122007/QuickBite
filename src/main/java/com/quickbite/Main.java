@@ -1,9 +1,10 @@
 package com.quickbite;
 
-import io.javalin.Javalin;
-import io.javalin.http.staticfiles.Location;
+import com.quickbite.controller.OrderController;
 import com.quickbite.model.User;
 import com.quickbite.util.PasswordUtil;
+import io.javalin.Javalin;
+import io.javalin.http.staticfiles.Location;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,14 +25,16 @@ public class Main {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/public", Location.CLASSPATH);
         }).start(8080);
+
         System.out.println("QuickBite Server successfully started on http://localhost:8080");
 
         // Security Filter: Enforce authentication on all protected API paths
         app.before("/api/*", ctx -> {
             String path = ctx.path();
-            if (path.equals("/api/auth/login") || 
-                path.equals("/api/auth/register") || 
-                path.equals("/api/health")) {
+            if (path.equals("/api/auth/login") ||
+                path.equals("/api/auth/register") ||
+                path.equals("/api/health") ||
+                path.startsWith("/api/orders")) {
                 return;
             }
 
@@ -41,59 +44,54 @@ public class Main {
             }
         });
 
-        // Root & Health
-        app.get("/", ctx -> {
-            ctx.result("QuickBite Canteen Management System Server is Running!");
+        // Root & Health Endpoints
+        app.get("/", ctx -> ctx.redirect("/index.html"));
+        app.get("/api/health", ctx -> ctx.json(Map.of("status", "UP", "message", "QuickBite server running")));
+
+        // Authentication: Login
+        app.post("/api/auth/login", ctx -> {
+            Map<String, String> creds = ctx.bodyAsClass(Map.class);
+            String username = creds.get("username");
+            String password = creds.get("password");
+
+            User user = userDatabase.get(username);
+            if (user != null && PasswordUtil.checkPassword(password, user.getPassword())) {
+                String token = "qb_sess_" + UUID.randomUUID().toString();
+                ctx.json(Map.of(
+                    "success", true,
+                    "token", token,
+                    "role", user.getRole(),
+                    "username", username
+                ));
+            } else {
+                ctx.status(401).json(Map.of("success", false, "error", "Invalid username or password."));
+            }
         });
 
-        app.get("/api/health", ctx -> {
-            ctx.json(Map.of("status", "UP"));
-        });
-
-        // POST /api/auth/register - BCrypt hashed
+        // Authentication: Register
         app.post("/api/auth/register", ctx -> {
-            User user = ctx.bodyAsClass(User.class);
-            if (user.getUsername() == null || user.getPassword() == null ||
-                user.getUsername().isBlank() || user.getPassword().isBlank()) {
-                ctx.status(400).json(Map.of("error", "Username and password cannot be empty."));
+            Map<String, String> creds = ctx.bodyAsClass(Map.class);
+            String username = creds.get("username");
+            String password = creds.get("password");
+
+            if (username == null || password == null || username.isBlank() || password.isBlank()) {
+                ctx.status(400).json(Map.of("error", "Username and password are required."));
                 return;
             }
 
-            if (userDatabase.containsKey(user.getUsername())) {
+            if (userDatabase.containsKey(username)) {
                 ctx.status(409).json(Map.of("error", "Username already exists."));
                 return;
             }
 
-            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
-            user.setPassword(hashedPassword);
-            user.setRole("STUDENT");
-
-            userDatabase.put(user.getUsername(), user);
-
-            ctx.status(201).json(Map.of(
-                "message", "User registered successfully",
-                "username", user.getUsername(),
-                "role", user.getRole()
-            ));
+            User newUser = new User(username, PasswordUtil.hashPassword(password), "STUDENT");
+            userDatabase.put(username, newUser);
+            ctx.status(201).json(Map.of("success", true, "message", "Registration successful!"));
         });
 
-        // POST /api/auth/login - BCrypt verification
-        app.post("/api/auth/login", ctx -> {
-            User credentials = ctx.bodyAsClass(User.class);
-            User storedUser = userDatabase.get(credentials.getUsername());
-
-            if (storedUser != null && PasswordUtil.checkPassword(credentials.getPassword(), storedUser.getPassword())) {
-                ctx.json(Map.of(
-                    "status", "success",
-                    "username", storedUser.getUsername(),
-                    "role", storedUser.getRole(),
-                    "token", "qb_sess_" + UUID.randomUUID().toString()
-                ));
-            } else {
-                ctx.status(401).json(Map.of("error", "Invalid username or password."));
-            }
-        });
-
-        System.out.println("QuickBite Server successfully started on http://localhost:7000");
+        // Order Routes (Student checkout, polling, and Kitchen Admin status transitions)
+        app.post("/api/orders", OrderController::createOrder);
+        app.get("/api/orders", OrderController::getOrders);
+        app.patch("/api/orders/{token}/status", OrderController::updateOrderStatus);
     }
 }

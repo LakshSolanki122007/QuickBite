@@ -1,9 +1,12 @@
 package com.quickbite.model;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class BaseEntity {
     private Long id;
+
+    @JsonIgnore
     private LocalDateTime createdAt;
 
     public BaseEntity() {
@@ -23,6 +26,7 @@ public abstract class BaseEntity {
         this.id = id;
     }
 
+    @JsonIgnore
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

@@ -13,7 +13,7 @@ public class OrderController {
         try {
             Map<String, Object> body = ctx.bodyAsClass(Map.class);
             String slot = (String) body.getOrDefault("slot", "12:00 PM - 12:15 PM");
-            double totalAmount = Double.parseDouble(body.getOrDefault("total", "0.0").toString());
+            double totalAmount = Double.parseDouble(body.getOrDefault("totalPrice", body.getOrDefault("total", "0.0")).toString());
 
             String token = orderDao.createOrder(slot, totalAmount);
 

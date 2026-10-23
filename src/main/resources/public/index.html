@@ -1,409 +1,586 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QuickBite | Canteen Hub</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsPDF CDN for Bill Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-white">
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-orange-500 selection:text-white">
 
-  <!-- Top Navigation -->
-  <header class="border-b border-slate-800 bg-[#111827]/80 px-6 py-4 flex items-center justify-between sticky top-0 z-50 backdrop-blur">
-    <div class="flex items-center gap-3">
-      <div class="h-10 w-10 bg-orange-600 rounded-xl flex items-center justify-center font-black text-xl text-white shadow-lg shadow-orange-600/30">
-        🍔
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-lg font-bold tracking-tight text-white">QuickBite</h1>
-          <span class="text-[10px] font-bold uppercase tracking-wider bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded border border-orange-500/30">Express</span>
+  <!-- Header / Navigation Bar -->
+  <header class="border-b border-slate-800/80 bg-[#0d1424]/90 backdrop-blur sticky top-0 z-50 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/20 font-black text-xl">
+          QB
         </div>
-        <p class="text-xs text-slate-400">Campus Canteen Smart Portal</p>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-white tracking-tight text-lg">QuickBite</span>
+            <span class="bg-orange-500/20 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded tracking-wide uppercase border border-orange-500/30">Express</span>
+          </div>
+          <p class="text-xs text-slate-400">Campus Canteen Smart Portal</p>
+        </div>
       </div>
-    </div>
-    
-    <div class="flex items-center gap-4">
-      <div class="flex items-center gap-2 bg-[#131c2e] border border-slate-800 px-3 py-1.5 rounded-full text-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span class="font-medium text-slate-300">student</span>
-        <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">CAMPUS</span>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 bg-[#131b2e] border border-slate-800 px-3 py-1.5 rounded-full text-xs text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>student</span>
+          <span class="text-slate-500 text-[10px] uppercase font-bold tracking-wider ml-1">Campus</span>
+        </div>
+        <a href="admin.html" class="flex items-center gap-1.5 bg-[#17223b] hover:bg-slate-800 border border-slate-700/80 hover:border-slate-600 text-slate-200 text-xs font-medium px-3.5 py-2 rounded-xl transition">
+          Kitchen Board &rarr;
+        </a>
       </div>
-      <a href="/admin.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-        Kitchen Board →
-      </a>
     </div>
   </header>
 
   <!-- Main Content Layout -->
-  <main class="max-w-7xl mx-auto w-full px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
-    
-    <!-- Left 2 Cols: Menu & Active Token -->
-    <div class="lg:col-span-2 space-y-8">
-      
-      <!-- Menu Grid -->
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold text-slate-200">Fresh Menu Items</h2>
-          <span class="text-xs text-slate-400">Real-time canteen inventory</span>
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- Left Column: Menu Catalog & Active Token Tracking (8 Cols) -->
+    <div class="lg:col-span-8 flex flex-col gap-8">
+
+      <!-- Catalog Header -->
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white tracking-tight">Fresh Menu Items</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Quick campus favorites prepared fresh to order</p>
         </div>
+        <span class="text-xs font-mono text-slate-400 bg-slate-900/60 border border-slate-800 px-2.5 py-1 rounded-lg">
+          Real-time canteen inventory
+        </span>
+      </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="menu-container">
-          <!-- Item 1 -->
-          <div class="bg-[#131c2e] border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition flex flex-col justify-between group">
-            <div class="relative h-44 overflow-hidden bg-slate-900">
-              <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=600&q=80" alt="Cold Coffee" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-              <span class="absolute top-3 left-3 bg-blue-500/80 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">Chilled</span>
-              <span class="absolute top-3 right-3 bg-black/70 backdrop-blur text-orange-400 text-xs font-bold px-2 py-1 rounded-md font-mono">₹120.00</span>
-            </div>
-            <div class="p-4 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="font-bold text-slate-100 text-sm">Cold Coffee with Ice Cream</h3>
-                <p class="text-xs text-slate-400 mt-1 leading-relaxed">Creamy blended espresso coffee, chilled whole milk, topped with vanilla scoop.</p>
-              </div>
-              <button onclick="addToTray('Cold Coffee with Ice Cream', 120)" class="mt-4 w-full bg-slate-800 hover:bg-orange-600 hover:text-white text-slate-300 text-xs font-semibold py-2 rounded-xl border border-slate-700 hover:border-transparent transition flex items-center justify-center gap-1.5">
-                <span>+</span> Add to Tray
-              </button>
-            </div>
-          </div>
+      <!-- Menu Items Grid (12 Items) -->
+      <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Rendered Dynamically via JavaScript -->
+      </div>
 
-          <!-- Item 2 -->
-          <div class="bg-[#131c2e] border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition flex flex-col justify-between group">
-            <div class="relative h-44 overflow-hidden bg-slate-900">
-              <img src="https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" alt="Paneer Sandwich" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-              <span class="absolute top-3 left-3 bg-emerald-500/80 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">Fresh Pick</span>
-              <span class="absolute top-3 right-3 bg-black/70 backdrop-blur text-orange-400 text-xs font-bold px-2 py-1 rounded-md font-mono">₹140.00</span>
-            </div>
-            <div class="p-4 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="font-bold text-slate-100 text-sm">Grilled Veg Paneer Sandwich</h3>
-                <p class="text-xs text-slate-400 mt-1 leading-relaxed">Multigrain toasted artisan bread loaded with marinated paneer & mint chutney.</p>
-              </div>
-              <button onclick="addToTray('Grilled Veg Paneer Sandwich', 140)" class="mt-4 w-full bg-slate-800 hover:bg-orange-600 hover:text-white text-slate-300 text-xs font-semibold py-2 rounded-xl border border-slate-700 hover:border-transparent transition flex items-center justify-center gap-1.5">
-                <span>+</span> Add to Tray
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Live Active Token Section -->
-      <section id="active-token-section" class="hidden">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-base font-semibold text-slate-200">Live Active Token</h2>
-          <span class="text-xs text-emerald-400 flex items-center gap-1.5">
+      <!-- Live Active Token Section (Appears Once Order Placed) -->
+      <div id="live-token-container" class="hidden bg-[#131b2e] border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
+          <h3 class="text-sm font-bold text-white tracking-wide uppercase">Live Active Token</h3>
+          <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             Real-time server sync
           </span>
         </div>
 
-        <div class="bg-[#131c2e] border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-          <div class="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-slate-800">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold uppercase tracking-wider bg-orange-600/20 text-orange-400 border border-orange-500/30 px-2.5 py-1 rounded-md">
-                  Active Ticket
-                </span>
-                <span id="display-token" class="text-xl font-black font-mono text-orange-400 tracking-wide">TK-000</span>
-              </div>
-              <p id="display-time" class="text-xs text-slate-400 mt-2">Ordered at: --:--</p>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <span id="display-status-badge" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-950/70 text-amber-400 border border-amber-800/60">
-                PENDING
-              </span>
-            </div>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-orange-500/20 text-orange-400 text-xs font-bold px-2 py-1 rounded-lg uppercase tracking-wider border border-orange-500/30">
+              Active Ticket
+            </span>
+            <span id="token-id" class="text-2xl font-black tracking-wider text-white font-mono">TK-100</span>
           </div>
-
-          <div class="py-4">
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Order Items</h4>
-            <div id="display-items-list" class="text-sm text-slate-200 space-y-1"></div>
-          </div>
-
-          <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <span class="text-xs text-slate-400">Total Paid: </span>
-              <span id="display-total-paid" class="text-base font-bold font-mono text-emerald-400">₹0.00</span>
-            </div>
-            <button onclick="downloadPdfReceipt()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center gap-2">
-              <span>📄</span> Download PDF Bill
-            </button>
-          </div>
+          <span id="token-status-badge" class="px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border bg-amber-500/20 text-amber-400 border-amber-500/30">
+            PENDING
+          </span>
         </div>
-      </section>
+
+        <p id="token-time" class="text-xs text-slate-400 mb-4 font-mono">Ordered at --:--</p>
+
+        <div class="bg-[#0e1626] rounded-xl p-3 border border-slate-800/80 mb-5">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ordered Items</span>
+          <p id="token-items-summary" class="text-xs text-slate-200 leading-relaxed font-mono">--</p>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+          <div>
+            <span class="text-xs text-slate-400 block">Total Paid</span>
+            <span id="token-total-paid" class="text-base font-bold text-emerald-400 font-mono">₹0.00</span>
+          </div>
+          <button onclick="downloadPDF()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-700 transition cursor-pointer">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Download PDF Bill
+          </button>
+        </div>
+      </div>
 
     </div>
 
-    <!-- Right Col: Cart Tray -->
-    <aside class="space-y-6">
-      <div class="bg-[#131c2e] border border-slate-800 rounded-2xl p-6 sticky top-24">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+    <!-- Right Column: Tray & Live Calculations (4 Cols) -->
+    <div class="lg:col-span-4">
+      <div class="bg-[#131b2e] border border-slate-800 rounded-2xl p-5 sticky top-24 shadow-xl">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-4">
           <div class="flex items-center gap-2">
-            <h2 class="font-bold text-slate-200 text-base">Your Tray</h2>
-            <span id="tray-count-badge" class="text-xs bg-orange-600/30 text-orange-400 font-bold px-2 py-0.5 rounded-full">0</span>
+            <h3 class="font-bold text-white text-base">Your Tray</h3>
+            <span id="tray-count-badge" class="bg-orange-500/20 text-orange-400 font-bold text-xs px-2 py-0.5 rounded-full border border-orange-500/30">0</span>
           </div>
-          <button onclick="clearTray()" class="text-xs text-slate-400 hover:text-rose-400 transition">Clear All</button>
+          <button onclick="clearTray()" class="text-xs text-slate-400 hover:text-slate-200 transition">Clear All</button>
         </div>
 
-        <!-- Cart Items Container -->
-        <div id="cart-items" class="py-4 space-y-3 max-h-60 overflow-y-auto">
-          <div id="cart-empty" class="text-center py-8 text-slate-500">
-            <div class="text-3xl mb-2">🛒</div>
+        <!-- Tray Items List -->
+        <div id="tray-items-container" class="space-y-3 max-h-72 overflow-y-auto pr-1 mb-5">
+          <!-- Empty State -->
+          <div id="tray-empty" class="py-12 flex flex-col items-center justify-center text-center text-slate-500">
+            <svg class="w-10 h-10 mb-2 stroke-current opacity-40" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
             <p class="text-xs">Your tray is empty</p>
           </div>
         </div>
 
-        <!-- Bill Calculations -->
-        <div class="border-t border-slate-800 pt-4 space-y-2 text-xs">
+        <!-- Cost Breakdown -->
+        <div class="border-t border-slate-800/80 pt-4 space-y-2 text-xs mb-6">
           <div class="flex justify-between text-slate-400">
             <span>Subtotal</span>
-            <span id="subtotal-val" class="font-mono">Rs. 0.00</span>
+            <span id="summary-subtotal" class="font-mono text-slate-200">Rs. 0.00</span>
           </div>
           <div class="flex justify-between text-slate-400">
             <span>GST (5%)</span>
-            <span id="gst-val" class="font-mono">Rs. 0.00</span>
+            <span id="summary-tax" class="font-mono text-slate-200">Rs. 0.00</span>
           </div>
-          <div class="flex justify-between text-slate-100 font-bold text-sm pt-2 border-t border-slate-800/80">
-            <span>Grand Total</span>
-            <span id="grandtotal-val" class="text-emerald-400 font-mono">Rs. 0.00</span>
+          <div class="flex justify-between text-sm font-bold pt-2 border-t border-slate-800/60">
+            <span class="text-white">Grand Total</span>
+            <span id="summary-total" class="font-mono text-emerald-400">Rs. 0.00</span>
           </div>
         </div>
 
-        <!-- Checkout Action -->
-        <button id="checkout-btn" onclick="handleCheckout()" disabled class="mt-6 w-full bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-orange-600/20 text-xs">
+        <!-- Place Order CTA Button -->
+        <button id="btn-place-order" onclick="placeOrder()" disabled class="w-full py-3 bg-slate-800 text-slate-500 text-xs font-bold rounded-xl cursor-not-allowed transition duration-200 shadow-lg">
           Place Order & Get Token
         </button>
       </div>
-    </aside>
+    </div>
 
   </main>
 
+  <!-- Application Logic -->
   <script>
-    const API_BASE = '/api';
+    // 12 High-Res Canteen Products
+    const MENU_ITEMS = [
+      {
+        id: 1,
+        name: "Cold Coffee with Ice Cream",
+        price: 120,
+        tag: "CHILLED",
+        tagStyle: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+        desc: "Creamy blended espresso coffee, chilled whole milk, topped with vanilla scoop.",
+        image: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 2,
+        name: "Grilled Veg Paneer Sandwich",
+        price: 140,
+        tag: "FRESH PICK",
+        tagStyle: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+        desc: "Multigrain toasted artisan bread loaded with marinated paneer & mint chutney.",
+        image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 3,
+        name: "Crispy Veggie Burger",
+        price: 90,
+        tag: "BESTSELLER",
+        tagStyle: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+        desc: "Golden spiced herb potato patty, fresh lettuce, sliced tomatoes, and creamy garlic mayo.",
+        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        
+        id: 4,
+        name: "Peri-Peri French Fries",
+        price: 80,
+        tag: "CRUNCHY",
+        tagStyle: "bg-red-500/20 text-red-400 border-red-500/30",
+        desc: "Crispy golden shoestring fries tossed in fiery African peri-peri spice dust.",
+        image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80"
+      ,
+      },
+      {
+        id: 5,
+        name: "Masala Dosa with Sambar",
+        price: 110,
+        tag: "SOUTH INDIAN",
+        tagStyle: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+        desc: "Thin crisp fermented rice crepe stuffed with tempered aloo masala & coconut chutney.",
+        image: "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 6,
+        name: "Chole Bhature Platter",
+        price: 130,
+        tag: "SPECIAL",
+        tagStyle: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+        desc: "Two fluffy fried bhature served with rich Punjabi spiced chickpea curry, onions & pickle.",
+        image: "/images/chole-bhature.jpg",
+      },
+      {
+        id: 7,
+        name: "Veg Hakka Noodles",
+        price: 100,
+        tag: "WOK SPECIAL",
+        tagStyle: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+        desc: "Wok-tossed noodles with shredded bell peppers, cabbage, carrots, and aromatic soy sauce.",
+        image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 8,
+        name: "Paneer Tikka Frankie Roll",
+        price: 120,
+        tag: "GRAB & GO",
+        tagStyle: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+        desc: "Tandoori-spiced cottage cheese cubes, caramelized onions, and tangy sauce in a flaky wrap.",
+        image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 9,
+        name: "Steamed Veg Momos (6 pcs)",
+        price: 80,
+        tag: "STEAMED",
+        tagStyle: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+        desc: "Delicate steamed Himalayan dumplings stuffed with seasoned minced veggies & red dip.",
+        image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&auto=format&fit=crop&q=80",
+      },
+      {
+        id: 10,
+        name: "Cheesy Butter Maggi",
+        price: 65,
+        tag: "CAMPUS FAVORITE",
+        tagStyle: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+        desc: "Classic canteen noodles cooked with butter, signature masala, and melted cheese.",
+        image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 11,
+        name: "Punjabi Samosa Chaat",
+        price: 70,
+        tag: "STREET STYLE",
+        tagStyle: "bg-teal-500/20 text-teal-400 border-teal-500/30",
+        desc: "Crushed crisp samosas topped with warm chole, sweetened curd, tamarind chutney, and sev.",
+        image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 12,
+        name: "Fresh Mango Delight Smoothie",
+        price: 110,
+        tag: "REFRESHING",
+        tagStyle: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+        desc: "Thick Alphonso mango pulp blended with Greek yogurt, honey, and crushed ice.",
+        image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600&auto=format&fit=crop&q=80"
+      }
+    ];
+
     let tray = [];
-    let activeToken = null;
+    let activeOrder = null;
     let pollInterval = null;
-    let lastOrderDetails = null;
 
-    function addToTray(name, price) {
-      const existing = tray.find(item => item.name === name);
+    // Render 12 Cards Into Grid
+    function renderMenu() {
+      const grid = document.getElementById("menu-grid");
+      grid.innerHTML = MENU_ITEMS.map(item => `
+        <div class="bg-[#131b2e] border border-slate-800/90 rounded-2xl p-4 flex flex-col justify-between hover:border-slate-700 transition group shadow-sm">
+          <div>
+            <div class="relative h-44 w-full rounded-xl overflow-hidden mb-3 bg-slate-900">
+              <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <span class="absolute top-2.5 left-2.5 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded uppercase border backdrop-blur-md ${item.tagStyle}">
+                ${item.tag}
+              </span>
+              <span class="absolute top-2.5 right-2.5 bg-slate-900/90 text-amber-400 font-bold font-mono text-xs px-2.5 py-0.5 rounded-lg border border-slate-700">
+                ₹${item.price.toFixed(2)}
+              </span>
+            </div>
+            <h3 class="text-white font-semibold text-base mb-1 tracking-tight">${item.name}</h3>
+            <p class="text-slate-400 text-xs leading-relaxed mb-4">${item.desc}</p>
+          </div>
+          <button onclick="addToTray(${item.id})" class="w-full py-2.5 bg-slate-800/80 hover:bg-orange-600 text-slate-200 hover:text-white text-xs font-semibold rounded-xl transition duration-150 active:scale-[0.98]">
+            + Add to Tray
+          </button>
+        </div>
+      `).join("");
+    }
+
+    // Add to Tray Handler
+    function addToTray(id) {
+      const item = MENU_ITEMS.find(m => m.id === id);
+      const existing = tray.find(t => t.id === id);
       if (existing) {
-        existing.qty += 1;
+        existing.quantity += 1;
       } else {
-        tray.push({ name, price, qty: 1 });
+        tray.push({ ...item, quantity: 1 });
       }
-      renderTray();
+      updateTrayUI();
     }
 
-    function changeQty(name, delta) {
-      const item = tray.find(i => i.name === name);
-      if (!item) return;
-      item.qty += delta;
-      if (item.qty <= 0) {
-        tray = tray.filter(i => i.name !== name);
+    // Update Quantity
+    function updateQty(id, delta) {
+      const existing = tray.find(t => t.id === id);
+      if (!existing) return;
+      existing.quantity += delta;
+      if (existing.quantity <= 0) {
+        tray = tray.filter(t => t.id !== id);
       }
-      renderTray();
+      updateTrayUI();
     }
 
+    // Clear Tray
     function clearTray() {
       tray = [];
-      renderTray();
+      updateTrayUI();
     }
 
-    function renderTray() {
-      const container = document.getElementById('cart-items');
-      const emptyMsg = document.getElementById('cart-empty');
-      const checkoutBtn = document.getElementById('checkout-btn');
-      const countBadge = document.getElementById('tray-count-badge');
+    // Refresh Tray Calculations
+    function updateTrayUI() {
+      const container = document.getElementById("tray-items-container");
+      const emptyState = document.getElementById("tray-empty");
+      const badge = document.getElementById("tray-count-badge");
+      const placeBtn = document.getElementById("btn-place-order");
 
-      const totalItems = tray.reduce((sum, i) => sum + i.qty, 0);
-      countBadge.innerText = totalItems;
+      const totalItems = tray.reduce((sum, i) => sum + i.quantity, 0);
+      badge.textContent = totalItems;
 
       if (tray.length === 0) {
         container.innerHTML = `
-          <div id="cart-empty" class="text-center py-8 text-slate-500">
-            <div class="text-3xl mb-2">🛒</div>
+          <div id="tray-empty" class="py-12 flex flex-col items-center justify-center text-center text-slate-500">
+            <svg class="w-10 h-10 mb-2 stroke-current opacity-40" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
             <p class="text-xs">Your tray is empty</p>
           </div>
         `;
-        checkoutBtn.disabled = true;
-        document.getElementById('subtotal-val').innerText = 'Rs. 0.00';
-        document.getElementById('gst-val').innerText = 'Rs. 0.00';
-        document.getElementById('grandtotal-val').innerText = 'Rs. 0.00';
+        document.getElementById("summary-subtotal").textContent = "Rs. 0.00";
+        document.getElementById("summary-tax").textContent = "Rs. 0.00";
+        document.getElementById("summary-total").textContent = "Rs. 0.00";
+        placeBtn.disabled = true;
+        placeBtn.className = "w-full py-3 bg-slate-800 text-slate-500 text-xs font-bold rounded-xl cursor-not-allowed transition duration-200 shadow-lg";
         return;
       }
 
-      checkoutBtn.disabled = false;
-      let subtotal = 0;
-
-      container.innerHTML = tray.map(item => {
-        const itemTotal = item.price * item.qty;
-        subtotal += itemTotal;
-        return `
-          <div class="flex items-center justify-between text-xs bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
-            <div>
-              <p class="font-medium text-slate-200">${item.name}</p>
-              <p class="text-slate-500 font-mono">₹${item.price} each</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="changeQty('${item.name}', -1)" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 flex items-center justify-center font-bold">-</button>
-              <span class="font-mono text-slate-200">${item.qty}</span>
-              <button onclick="changeQty('${item.name}', 1)" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 rounded text-slate-300 flex items-center justify-center font-bold">+</button>
-              <span class="font-mono font-bold text-orange-400 ml-2">₹${itemTotal}</span>
-            </div>
+      container.innerHTML = tray.map(item => `
+        <div class="flex items-center justify-between bg-[#0e1626] border border-slate-800/80 p-2.5 rounded-xl">
+          <div class="flex-1 pr-2">
+            <h4 class="text-xs font-medium text-white truncate">${item.name}</h4>
+            <span class="text-[11px] text-amber-400 font-mono">₹${item.price} each</span>
           </div>
-        `;
-      }).join('');
+          <div class="flex items-center gap-2">
+            <div class="flex items-center bg-[#131b2e] border border-slate-700 rounded-lg">
+              <button onclick="updateQty(${item.id}, -1)" class="px-2 py-0.5 text-slate-300 hover:text-white text-xs">-</button>
+              <span class="px-1 text-xs font-mono text-white">${item.quantity}</span>
+              <button onclick="updateQty(${item.id}, 1)" class="px-2 py-0.5 text-slate-300 hover:text-white text-xs">+</button>
+            </div>
+            <span class="text-xs font-mono text-slate-200 w-12 text-right">₹${item.price * item.quantity}</span>
+          </div>
+        </div>
+      `).join("");
 
+      const subtotal = tray.reduce((sum, i) => sum + (i.price * i.quantity), 0);
       const gst = subtotal * 0.05;
       const grandTotal = subtotal + gst;
 
-      document.getElementById('subtotal-val').innerText = `Rs. ${subtotal.toFixed(2)}`;
-      document.getElementById('gst-val').innerText = `Rs. ${gst.toFixed(2)}`;
-      document.getElementById('grandtotal-val').innerText = `Rs. ${grandTotal.toFixed(2)}`;
+      document.getElementById("summary-subtotal").textContent = `Rs. ${subtotal.toFixed(2)}`;
+      document.getElementById("summary-tax").textContent = `Rs. ${gst.toFixed(2)}`;
+      document.getElementById("summary-total").textContent = `Rs. ${grandTotal.toFixed(2)}`;
+
+      placeBtn.disabled = false;
+      placeBtn.className = "w-full py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-lg shadow-orange-500/20 transition duration-200 active:scale-[0.99]";
     }
 
-    async function handleCheckout() {
+    // Place Order API Mutation
+    async function placeOrder() {
       if (tray.length === 0) return;
 
-      const subtotal = tray.reduce((sum, i) => sum + (i.price * i.qty), 0);
-      const grandTotal = parseFloat((subtotal * 1.05).toFixed(2));
-      const orderSummaryItems = [...tray];
+      const subtotal = tray.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+      const grandTotal = subtotal * 1.05;
 
-      const checkoutBtn = document.getElementById('checkout-btn');
-      checkoutBtn.disabled = true;
-      checkoutBtn.innerText = 'Transmitting Order...';
+      const payload = {
+        items: tray.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
+        total: grandTotal,
+        totalPrice: grandTotal
+      };
 
       try {
-        const response = await fetch(`${API_BASE}/orders`, {
+        const res = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            slot: '12:00 PM - 12:15 PM',
-            total: grandTotal
-          })
+          body: JSON.stringify(payload)
         });
 
-        if (!response.ok) {
-          throw new Error(`Server returned HTTP ${response.status}`);
-        }
+        if (!res.ok) throw new Error("Server responded with error");
+        const order = await res.json();
 
-        const data = await response.json();
-        activeToken = data.token; // TK-101 format from OrderDao
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        lastOrderDetails = {
-          token: activeToken,
-          items: orderSummaryItems,
-          total: grandTotal,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
+        activeOrder = {
+    id: order.id,
+    token: order.token || `TK-${100 + (order.id || 1)}`,
+    status: order.status || 'PENDING',
+    items: [...tray],
+    total: grandTotal,
+    time: timeStr
+};
 
-        // Render Active Token card
-        document.getElementById('active-token-section').classList.remove('hidden');
-        document.getElementById('display-token').innerText = activeToken;
-        document.getElementById('display-time').innerText = `Ordered at: ${lastOrderDetails.time}`;
-        document.getElementById('display-total-paid').innerText = `₹${grandTotal.toFixed(2)}`;
-        document.getElementById('display-items-list').innerHTML = orderSummaryItems
-          .map(i => `<p>• ${i.qty}x ${i.name} (₹${i.price * i.qty})</p>`)
-          .join('');
-
+        renderActiveOrder();
         clearTray();
-        startOrderPolling(activeToken);
-
+        startPolling();
       } catch (err) {
-        console.error('Order error:', err);
-        alert('Could not submit order: ' + err.message);
-      } finally {
-        checkoutBtn.innerText = 'Place Order & Get Token';
-        checkoutBtn.disabled = tray.length === 0;
+        console.error("Order submission failed:", err);
+        alert("Failed to submit order. Please check backend connection.");
       }
     }
 
-    function startOrderPolling(token) {
-      if (pollInterval) clearInterval(pollInterval);
+    // Render Active Token Block
+    function toggleActiveOrderStatus() {
+    if (!activeOrder) return;
+    const flow = ['PENDING', 'PREPARING', 'READY', 'COMPLETED'];
+    let idx = flow.indexOf(activeOrder.status);
+    activeOrder.status = flow[(idx + 1) % flow.length];
+    updateStatusBadge(activeOrder.status);
+}
 
-      pollInterval = setInterval(async () => {
+// Render Active Token Block
+function renderActiveOrder() {
+    if (!activeOrder) return;
+    const container = document.getElementById("live-token-container");
+    container.classList.remove("hidden");
+
+    document.getElementById("token-id").textContent = activeOrder.token;
+    document.getElementById("token-time").textContent = `Ordered at ${activeOrder.time}`;
+    document.getElementById("token-total-paid").textContent = `₹${activeOrder.total.toFixed(2)}`;
+    const itemsSummary = activeOrder.items.map(i => `${i.quantity}x ${i.name} (₹${i.price * i.quantity})`).join(", ");
+    document.getElementById("token-items-summary").textContent = itemsSummary;
+
+    updateStatusBadge(activeOrder.status);
+
+    const badge = document.getElementById("token-status-badge");
+    if (badge) {
+        badge.style.cursor = "pointer";
+        badge.title = "Click to change status";
+        badge.onclick = toggleActiveOrderStatus;
+    }
+}
+
+    // Dynamic Status Badge Styles
+function updateStatusBadge(status) {
+    const badge = document.getElementById("token-status-badge") || 
+                  document.getElementById("active-order-status") ||
+                  Array.from(document.querySelectorAll('span, div')).find(el => 
+                      ['PENDING', 'PREPARING', 'READY', 'READY_FOR_PICKUP', 'COMPLETED'].includes(el.textContent.trim())
+                  );
+
+    if (!badge) return;
+
+    const s = (status || '').toUpperCase();
+    badge.textContent = s;
+
+    if (s === 'PREPARING') {
+        badge.className = "px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse";
+    } else if (s === 'READY' || s === 'READY_FOR_PICKUP') {
+        badge.className = "px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+    } else if (s === 'COMPLETED') {
+        badge.className = "px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border bg-slate-700 text-slate-300 border-slate-600";
+    } else {
+        badge.className = "px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border bg-amber-500/20 text-amber-400 border-amber-500/30";
+    }
+}
+
+let pollingTimer = null;
+
+function startPolling() {
+    if (pollingTimer) clearInterval(pollingTimer);
+    if (!activeOrder) return;
+
+    pollingTimer = setInterval(async () => {
+        if (!activeOrder) return;
+
         try {
-          const res = await fetch(`${API_BASE}/orders`);
-          if (!res.ok) return;
-          const orders = await res.json();
+            const res = await fetch('/api/orders');
+            if (!res.ok) return;
 
-          const myOrder = orders.find(o => 
-            ("TK-" + o.id) === token || String(o.id) === token || o.token === token
-          );
+            const orders = await res.json();
+            // Match by ID or Token so it never fails even if ID is string/number
+            const current = orders.find(o => 
+                (activeOrder.id && o.id == activeOrder.id) ||
+                (activeOrder.token && (o.token === activeOrder.token || 'TK-' + o.id === activeOrder.token))
+            );
 
-          if (myOrder) {
-            updateTokenStatusUI(myOrder.status);
+            if (current && current.status && current.status !== activeOrder.status) {
+                console.log(`[Status Sync] ${activeOrder.status} -> ${current.status}`);
+                activeOrder.status = current.status;
+                updateStatusBadge(current.status);
 
-            if (myOrder.status === 'COMPLETED' || myOrder.status === 'CANCELLED') {
-              clearInterval(pollInterval);
+                if (current.status.toUpperCase() === 'COMPLETED' || current.status.toUpperCase() === 'CANCELLED') {
+                    clearInterval(pollingTimer);
+                }
             }
-          }
-        } catch (e) {
-          console.error('Polling error:', e);
+        } catch (err) {
+            console.error("Polling error:", err);
         }
-      }, 2500);
-    }
+    }, 1200); // 1.2s interval ensures 3-second transitions are caught instantly
+}
 
-    function updateTokenStatusUI(status) {
-      const badge = document.getElementById('display-status-badge');
-      badge.innerText = status;
+function downloadPDF() {
+  if (!activeOrder) {
+    alert("No active order found to export.");
+    return;
+  }
 
-      switch(status) {
-        case 'PENDING':
-          badge.className = 'text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-950/70 text-amber-400 border border-amber-800/60';
-          break;
-        case 'PREPARING':
-          badge.className = 'text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-950/70 text-blue-400 border border-blue-800/60';
-          break;
-        case 'READY_FOR_PICKUP':
-          badge.className = 'text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-950/70 text-emerald-400 border border-emerald-800/60 animate-pulse';
-          break;
-        case 'COMPLETED':
-          badge.className = 'text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
-          break;
-        case 'CANCELLED':
-          badge.className = 'text-xs font-semibold px-3 py-1.5 rounded-full bg-rose-950/70 text-rose-400 border border-rose-800/60';
-          break;
-      }
-    }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    function downloadPdfReceipt() {
-      if (!lastOrderDetails) return;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+  // Receipt Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("QuickBite Express", 20, 22);
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.text("QuickBite Canteen Receipt", 20, 20);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Token: ${activeOrder.token}`, 20, 32);
+  doc.text(`Ordered at: ${activeOrder.time || new Date().toLocaleTimeString()}`, 20, 40);
+  doc.line(20, 48, 190, 48);
 
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Token: ${lastOrderDetails.token}`, 20, 32);
-      doc.text(`Time: ${lastOrderDetails.time}`, 20, 40);
+  // Table Header
+  doc.setFont("helvetica", "bold");
+  doc.text("Item", 20, 68);
+  doc.text("Qty", 120, 68);
+  doc.text("Price", 160, 68);
 
-      doc.line(20, 46, 190, 46);
+  let y = 78;
+  doc.setFont("helvetica", "normal");
+  (activeOrder.items || []).forEach(item => {
+    doc.text(item.name, 20, y);
+    doc.text(item.quantity.toString(), 120, y);
+    doc.text(`Rs. ${(item.price * item.quantity).toFixed(2)}`, 160, y);
+    y += 8;
+  });
 
-      let y = 56;
-      doc.text("Items Ordered:", 20, y);
-      y += 8;
+  doc.line(20, y + 4, 190, y + 4);
+  y += 14;
 
-      lastOrderDetails.items.forEach(item => {
-        doc.text(`${item.qty}x ${item.name}`, 25, y);
-        doc.text(`Rs. ${(item.price * item.qty).toFixed(2)}`, 160, y);
-        y += 8;
-      });
+  const subtotal = (activeOrder.items || []).reduce((s, i) => s + (i.price * i.quantity), 0);
+  const tax = subtotal * 0.05;
 
-      doc.line(20, y, 190, y);
-      y += 10;
+  doc.text(`Subtotal: Rs. ${subtotal.toFixed(2)}`, 130, y);
+  y += 6;
+  doc.text(`GST (5%): Rs. ${tax.toFixed(2)}`, 130, y);
+  y += 8;
 
-      doc.setFont("helvetica", "bold");
-      doc.text(`Total Paid (Incl. GST): Rs. ${lastOrderDetails.total.toFixed(2)}`, 20, y);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(`Grand Total: Rs. ${(activeOrder.total || 0).toFixed(2)}`, 130, y);
 
-      doc.save(`Receipt_${lastOrderDetails.token}.pdf`);
-    }
+  doc.save(`QuickBite-Bill-${activeOrder.token || 'receipt'}.pdf`);
+}
+
+// Attach to window so any onclick attribute can call it
+window.downloadPDF = downloadPDF;
+window.downloadBill = downloadPDF;    // Initialize UI on Load
+    window.addEventListener("DOMContentLoaded", renderMenu);
   </script>
 </body>
 </html>

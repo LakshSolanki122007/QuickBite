@@ -12,11 +12,17 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javalin.version>6.1.3</javalin.version>
+        <javalin.version>6.4.0</javalin.version>
         <jackson.version>2.17.0</jackson.version>
     </properties>
 
     <dependencies>
+    <!-- MySQL Connector -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.3.0</version>
+        </dependency>
         <!-- Javalin Framework -->
         <dependency>
             <groupId>io.javalin</groupId>

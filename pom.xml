@@ -44,7 +44,7 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- jBCrypt for password hashing -->
+        <!-- jBcrypt for password hashing -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
